@@ -16,6 +16,7 @@ import { Coupon } from './models/Coupon';
 import { SeatLock } from './models/SeatLock';
 import { seedAdmin } from './seedAdmin';
 import { seedBuses } from './seedBuses';
+import { t } from './i18n';
 
 dotenv.config();
 
@@ -75,7 +76,7 @@ async function startServer() {
     const { from, to, date, type, minPrice, maxPrice, sortBy } = req.query;
 
     if (!from || !to || !date) {
-      return res.status(400).json({ error: 'From, To, and Date are required' });
+      return res.status(400).json({ error: t(req, 'from_to_date_required') });
     }
 
     try {
@@ -114,7 +115,7 @@ async function startServer() {
       res.json({ success: true, routes });
     } catch (error: any) {
       console.error('❌ Bus Search Error:', error.message);
-      res.status(500).json({ error: 'Failed to search buses' });
+      res.status(500).json({ error: t(req, 'failed_search_buses') });
     }
   });
 
@@ -122,10 +123,10 @@ async function startServer() {
   app.get('/api/buses/:id', async (req, res) => {
     try {
       const bus = await Bus.findById(req.params.id);
-      if (!bus) return res.status(404).json({ error: 'Bus not found' });
+      if (!bus) return res.status(404).json({ error: t(req, 'bus_not_found') });
       res.json({ success: true, bus });
     } catch (error: any) {
-      res.status(500).json({ error: 'Failed to fetch bus details' });
+      res.status(500).json({ error: t(req, 'failed_fetch_bus_details') });
     }
   });
 
@@ -134,7 +135,7 @@ async function startServer() {
     const { date } = req.query;
     const { busId, routeId } = req.params;
 
-    if (!date) return res.status(400).json({ error: 'Date is required' });
+    if (!date) return res.status(400).json({ error: t(req, 'date_required') });
 
     try {
       // Find all confirmed bookings for this bus/route/date
@@ -162,7 +163,7 @@ async function startServer() {
 
       res.json({ success: true, bookedSeats, lockedSeats });
     } catch (error: any) {
-      res.status(500).json({ error: 'Failed to fetch seats' });
+      res.status(500).json({ error: t(req, 'failed_fetch_seats') });
     }
   });
 
@@ -172,7 +173,7 @@ async function startServer() {
     const { seatNumber, travelDate, uid } = req.body;
 
     if (!seatNumber || !travelDate || !uid) {
-      return res.status(400).json({ error: 'Seat number, travel date, and UID are required' });
+      return res.status(400).json({ error: t(req, 'seat_lock_fields_required') });
     }
 
     try {
@@ -186,7 +187,7 @@ async function startServer() {
         status: { $ne: 'Cancelled' }
       });
 
-      if (isBooked) return res.status(400).json({ error: 'Seat already booked' });
+      if (isBooked) return res.status(400).json({ error: t(req, 'seat_already_booked') });
 
       // Try to create a lock (atomic due to unique index)
       const lock = new SeatLock({
@@ -198,12 +199,12 @@ async function startServer() {
       });
 
       await lock.save();
-      res.json({ success: true, message: 'Seat locked for 10 minutes' });
+      res.json({ success: true, message: t(req, 'seat_locked') });
     } catch (error: any) {
       if (error.code === 11000) {
-        return res.status(400).json({ error: 'Seat is already held by someone else' });
+        return res.status(400).json({ error: t(req, 'seat_held_by_other') });
       }
-      res.status(500).json({ error: 'Failed to lock seat' });
+      res.status(500).json({ error: t(req, 'failed_lock_seat') });
     }
   });
 
@@ -220,9 +221,9 @@ async function startServer() {
         seatNumber,
         uid
       });
-      res.json({ success: true, message: 'Seat unlocked' });
+      res.json({ success: true, message: t(req, 'seat_unlocked') });
     } catch (error: any) {
-      res.status(500).json({ error: 'Failed to unlock seat' });
+      res.status(500).json({ error: t(req, 'failed_unlock_seat') });
     }
   });
 
@@ -233,10 +234,10 @@ async function startServer() {
 
     try {
       const coupon = await Coupon.findOne({ code, isActive: true, expiryDate: { $gt: new Date() } });
-      if (!coupon) return res.status(404).json({ error: 'Invalid or expired coupon' });
+      if (!coupon) return res.status(404).json({ error: t(req, 'invalid_or_expired_coupon') });
 
       if (amount < coupon.minOrderValue) {
-        return res.status(400).json({ error: `Minimum order value for this coupon is ₹${coupon.minOrderValue}` });
+        return res.status(400).json({ error: t(req, 'min_order_value', { amount: coupon.minOrderValue }) });
       }
 
       let discount = 0;
@@ -249,7 +250,7 @@ async function startServer() {
 
       res.json({ success: true, discount, couponId: coupon._id });
     } catch (error: any) {
-      res.status(500).json({ error: 'Failed to validate coupon' });
+      res.status(500).json({ error: t(req, 'failed_validate_coupon') });
     }
   });
 
@@ -260,7 +261,7 @@ async function startServer() {
     const { amount, currency = 'INR', uid } = req.body;
 
     if (!amount || !uid) {
-      return res.status(400).json({ error: 'Amount and UID are required' });
+      return res.status(400).json({ error: t(req, 'amount_uid_required') });
     }
 
     try {
@@ -274,7 +275,7 @@ async function startServer() {
       const order = await razorpay.orders.create(options);
       res.json({ success: true, order });
     } catch (error: any) {
-      res.status(500).json({ error: 'Failed to initiate booking' });
+      res.status(500).json({ error: t(req, 'failed_initiate_booking') });
     }
   });
 
@@ -295,7 +296,7 @@ async function startServer() {
       .digest('hex');
 
     if (expectedSignature !== razorpay_signature) {
-      return res.status(400).json({ success: false, message: 'Payment verification failed' });
+      return res.status(400).json({ success: false, message: t(req, 'payment_verification_failed') });
     }
 
     try {
@@ -327,14 +328,14 @@ async function startServer() {
       res.json({ success: true, pnr, bookingId: booking._id });
     } catch (error: any) {
       console.error('❌ Booking Confirmation Error:', error.message);
-      res.status(500).json({ error: 'Failed to confirm booking' });
+      res.status(500).json({ error: t(req, 'failed_confirm_booking') });
     }
   });
 
   // Get User Bookings
   app.get('/api/bookings', async (req, res) => {
     const { uid } = req.query;
-    if (!uid) return res.status(400).json({ error: 'UID is required' });
+    if (!uid) return res.status(400).json({ error: t(req, 'uid_required') });
 
     try {
       const bookings = await Booking.find({ uid })
@@ -343,7 +344,7 @@ async function startServer() {
         .sort({ createdAt: -1 });
       res.json({ success: true, bookings });
     } catch (error: any) {
-      res.status(500).json({ error: 'Failed to fetch bookings' });
+      res.status(500).json({ error: t(req, 'failed_fetch_bookings') });
     }
   });
 
@@ -353,10 +354,10 @@ async function startServer() {
       const booking = await Booking.findById(req.params.id)
         .populate('busId')
         .populate('routeId');
-      if (!booking) return res.status(404).json({ error: 'Booking not found' });
+      if (!booking) return res.status(404).json({ error: t(req, 'booking_not_found') });
       res.json({ success: true, booking });
     } catch (error: any) {
-      res.status(500).json({ error: 'Failed to fetch booking' });
+      res.status(500).json({ error: t(req, 'failed_fetch_booking') });
     }
   });
 
@@ -364,25 +365,25 @@ async function startServer() {
   app.post('/api/bookings/:id/cancel', async (req, res) => {
     try {
       const booking = await Booking.findById(req.params.id);
-      if (!booking) return res.status(404).json({ error: 'Booking not found' });
+      if (!booking) return res.status(404).json({ error: t(req, 'booking_not_found') });
 
       if (booking.status === 'Cancelled') {
-        return res.status(400).json({ error: 'Booking is already cancelled' });
+        return res.status(400).json({ error: t(req, 'booking_already_cancelled') });
       }
 
       // Check if travel date is in the future (optional but recommended)
       const travelDate = new Date(booking.travelDate);
       if (travelDate < new Date()) {
-        return res.status(400).json({ error: 'Cannot cancel past bookings' });
+        return res.status(400).json({ error: t(req, 'cannot_cancel_past') });
       }
 
       booking.status = 'Cancelled';
       booking.payment.status = 'Refunded'; // In a real app, you'd initiate a Razorpay refund here
       await booking.save();
 
-      res.json({ success: true, message: 'Booking cancelled successfully' });
+      res.json({ success: true, message: t(req, 'booking_cancelled_success') });
     } catch (error: any) {
-      res.status(500).json({ error: 'Failed to cancel booking' });
+      res.status(500).json({ error: t(req, 'failed_cancel_booking') });
     }
   });
 
@@ -391,7 +392,7 @@ async function startServer() {
     const { uid, email, name, phone, role } = req.body;
 
     if (!uid || !email) {
-      return res.status(400).json({ error: 'UID and Email are required' });
+      return res.status(400).json({ error: t(req, 'uid_email_required') });
     }
 
     try {
@@ -403,7 +404,7 @@ async function startServer() {
       res.json({ success: true, user });
     } catch (error: any) {
       console.error('❌ User Sync Error:', error.message);
-      res.status(500).json({ error: 'Failed to sync user', details: error.message });
+      res.status(500).json({ error: t(req, 'failed_sync_user'), details: error.message });
     }
   });
 
@@ -412,7 +413,7 @@ async function startServer() {
     const { uid, name, phone, avatar, preferredLang, notificationPreferences } = req.body;
 
     if (!uid) {
-      return res.status(400).json({ error: 'UID is required' });
+      return res.status(400).json({ error: t(req, 'uid_required') });
     }
 
     try {
@@ -422,12 +423,12 @@ async function startServer() {
         { new: true }
       );
       if (!user) {
-        return res.status(404).json({ error: 'User not found' });
+        return res.status(404).json({ error: t(req, 'user_not_found') });
       }
       res.json({ success: true, user });
     } catch (error: any) {
       console.error('❌ Profile Update Error:', error.message);
-      res.status(500).json({ error: 'Failed to update profile', details: error.message });
+      res.status(500).json({ error: t(req, 'failed_update_profile'), details: error.message });
     }
   });
 
@@ -436,7 +437,7 @@ async function startServer() {
     const { amount, currency = 'INR' } = req.body;
 
     if (!amount) {
-      return res.status(400).json({ error: 'Amount is required' });
+      return res.status(400).json({ error: t(req, 'amount_required') });
     }
 
     try {
@@ -450,7 +451,7 @@ async function startServer() {
       res.json({ success: true, order });
     } catch (error: any) {
       console.error('❌ Razorpay Error:', error.message);
-      res.status(500).json({ error: 'Failed to create Razorpay order', details: error.message });
+      res.status(500).json({ error: t(req, 'failed_create_razorpay_order'), details: error.message });
     }
   });
 
@@ -465,9 +466,9 @@ async function startServer() {
       .digest('hex');
 
     if (expectedSignature === razorpay_signature) {
-      res.json({ success: true, message: 'Payment verified successfully' });
+      res.json({ success: true, message: t(req, 'payment_verified_successfully') });
     } else {
-      res.status(400).json({ success: false, message: 'Invalid signature' });
+      res.status(400).json({ success: false, message: t(req, 'invalid_signature') });
     }
   });
 
@@ -476,26 +477,26 @@ async function startServer() {
     const { paymentId, amount, notes, adminUid } = req.body;
 
     if (!paymentId) {
-      return res.status(400).json({ error: 'Payment ID is required' });
+      return res.status(400).json({ error: t(req, 'payment_id_required') });
     }
 
     try {
       // Verify admin role in MongoDB
       const admin = await User.findOne({ uid: adminUid, role: 'admin' });
       if (!admin) {
-        return res.status(403).json({ error: 'Unauthorized. Admin access required.' });
+        return res.status(403).json({ error: t(req, 'unauthorized_admin') });
       }
 
       const refund = await razorpay.payments.refund(paymentId, {
         amount: amount ? Math.round(amount * 100) : undefined, // Partial refund if amount provided
-        notes: notes || { reason: 'Admin initiated refund' }
+        notes: notes || { reason: t(req, 'admin_refund_reason') }
       });
       
       console.log(`✅ Refund initiated: ${refund.id}`);
       res.json({ success: true, refund });
     } catch (error: any) {
       console.error('❌ Razorpay Refund Error:', error.message);
-      res.status(500).json({ error: 'Failed to initiate refund', details: error.message });
+      res.status(500).json({ error: t(req, 'failed_initiate_refund'), details: error.message });
     }
   });
 
@@ -519,7 +520,7 @@ async function startServer() {
       
       res.json({ status: 'ok' });
     } else {
-      res.status(400).send('Invalid signature');
+      res.status(400).send(t(req, 'invalid_webhook_signature'));
     }
   });
 
@@ -528,7 +529,7 @@ async function startServer() {
     const { to, message } = req.body;
 
     if (!to || !message) {
-      return res.status(400).json({ error: 'Phone number and message are required' });
+      return res.status(400).json({ error: t(req, 'phone_and_message_required') });
     }
 
     const accountSid = process.env.TWILIO_ACCOUNT_SID;
@@ -537,7 +538,7 @@ async function startServer() {
 
     if (!accountSid || !authToken || !fromNumber) {
       console.warn('⚠️ Twilio credentials missing in environment variables');
-      return res.status(500).json({ error: 'SMS service not configured on server' });
+      return res.status(500).json({ error: t(req, 'sms_service_not_configured') });
     }
 
     try {
@@ -554,7 +555,7 @@ async function startServer() {
       res.json({ success: true, sid: result.sid });
     } catch (error: any) {
       console.error('❌ Twilio Error:', error.message);
-      res.status(500).json({ error: 'Failed to send SMS', details: error.message });
+      res.status(500).json({ error: t(req, 'failed_send_sms'), details: error.message });
     }
   });
 
