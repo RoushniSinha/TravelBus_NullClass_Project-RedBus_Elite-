@@ -1,0 +1,69 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile and authentication data",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Firebase Auth UID" },
+        "name": { "type": "string", "description": "Full name" },
+        "email": { "type": "string", "description": "Email address" },
+        "role": { "type": "string", "enum": ["user", "admin", "operator"], "description": "User role" },
+        "avatar": { "type": "string", "description": "Avatar URL" },
+        "phone": { "type": "string", "description": "Phone number" },
+        "preferredLang": { "type": "string", "enum": ["en", "hi", "te", "ta", "mr"], "description": "Preferred language" },
+        "isActive": { "type": "boolean", "description": "Account status" },
+        "isBanned": { "type": "boolean", "description": "Banned status" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Account creation date" }
+      },
+      "required": ["uid", "email", "role"]
+    },
+    "Bus": {
+      "title": "Bus",
+      "description": "Bus details and route information",
+      "type": "object",
+      "properties": {
+        "busNumber": { "type": "string" },
+        "busType": { "type": "string" },
+        "fromCity": { "type": "string" },
+        "toCity": { "type": "string" },
+        "departureTime": { "type": "string", "format": "date-time" },
+        "arrivalTime": { "type": "string", "format": "date-time" },
+        "price": { "type": "number" },
+        "totalSeats": { "type": "integer" },
+        "availableSeats": { "type": "integer" },
+        "amenities": { "type": "array", "items": { "type": "string" } },
+        "avgRating": { "type": "number" },
+        "isActive": { "type": "boolean" }
+      }
+    },
+    "Booking": {
+      "title": "Booking",
+      "description": "Bus ticket booking details",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "busId": { "type": "string" },
+        "pnr": { "type": "string" },
+        "passengers": { "type": "array", "items": { "type": "object" } },
+        "totalFare": { "type": "number" },
+        "status": { "type": "string", "enum": ["PENDING", "CONFIRMED", "CANCELLED", "COMPLETED"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User documents"
+    },
+    "/buses/{busId}": {
+      "schema": "Bus",
+      "description": "Bus documents"
+    },
+    "/bookings/{bookingId}": {
+      "schema": "Booking",
+      "description": "Booking documents"
+    }
+  }
+}

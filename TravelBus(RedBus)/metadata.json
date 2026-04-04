@@ -1,0 +1,7 @@
+{
+  "name": "TravelBus (RedBus-Elite)",
+  "description": "A premium full-stack bus booking platform with separate admin and user portals, real-time tracking, and community features.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
