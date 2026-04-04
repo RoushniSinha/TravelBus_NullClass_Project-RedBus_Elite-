@@ -49,6 +49,8 @@
 
 TravelBus (RedBus-Elite) is a production-grade, full-stack bus booking platform that goes beyond conventional ticketing. It integrates real-time GIS route mapping, a community travel platform, multi-language support, and a weighted Elite Score review system — all in a single unified interface.
 
+[##Live Link of the WEBSITE -> ](https://travel-bus-red-bus-elite.vercel.app/)
+
 Built to solve the **Digital Disconnect** in Indian bus travel:
 
 | Problem | TravelBus Solution |
@@ -65,28 +67,28 @@ Built to solve the **Digital Disconnect** in Indian bus travel:
 
 <table>
   <tr>
+    <td align="center"><strong>Home Page</strong></td>
+    <td align="center"><strong>Bus Booking</strong></td>
+    <td align="center"><strong>Admi Dashboard</strong></td>
+  </tr>
+  <tr>
+    <td><img src="TravelBus(RedBus)/Our Project ScreenSHorts/Our home page.png" alt="Home Page" width="100%"/></td>
+    <td><img src="TravelBus(RedBus)/Our Project ScreenSHorts/Our Buses.png" alt="Buses Creation" width="100%"/></td>
+    <td><img src="TravelBus(RedBus)/Our Project ScreenSHorts/Our Admin Dashboard.png" alt="Admin page" width="100%"/></td>
+  </tr>
+  <tr>
     <td align="center"><strong>Seat Selection</strong></td>
-    <td align="center"><strong>Passenger Details</strong></td>
+    <td align="center"><strong>Live Navigation</strong></td>
     <td align="center"><strong>Razorpay Payment</strong></td>
   </tr>
   <tr>
-    <td><img src="docs/screenshots/seat-selection.png" alt="Seat Selection" width="100%"/></td>
-    <td><img src="docs/screenshots/passenger-details.png" alt="Passenger Details" width="100%"/></td>
-    <td><img src="docs/screenshots/payment.png" alt="Payment" width="100%"/></td>
-  </tr>
-  <tr>
-    <td align="center"><strong>Travel Stories</strong></td>
-    <td align="center"><strong>Community Forum</strong></td>
-    <td align="center"><strong>Admin Reviews</strong></td>
-  </tr>
-  <tr>
-    <td><img src="docs/screenshots/stories.png" alt="Stories" width="100%"/></td>
-    <td><img src="docs/screenshots/community.png" alt="Community" width="100%"/></td>
-    <td><img src="docs/screenshots/admin-reviews.png" alt="Admin Reviews" width="100%"/></td>
+    <td><img src="TravelBus(RedBus)/Our Project ScreenSHorts/Our-Seat selection Page.png" alt="Seat" width="100%"/></td>
+    <td><img src="TravelBus(RedBus)/Our Project ScreenSHorts/Our Bus Page Part 2 gis  Navigation route.png" alt="Live navigation" width="100%"/></td>
+    <td><img src="TravelBus(RedBus)/Our Project ScreenSHorts/Our RAZORPAY WORK THROUGH UPI.png" alt="Razor Payment" width="100%"/></td>
   </tr>
 </table>
 
-> **Design:** OLED black (`#000000`) theme with orange (`#F97316`) accent — user-facing pages use light theme, admin panel uses dark navy sidebar.
+> **Admin panel:** is accessed by admin only. this page is not open by any outsider of this project contribution only user dashboard visible through login and register.
 
 ---
 
